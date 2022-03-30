@@ -4,10 +4,12 @@ use std::error::Error;
 use std::fmt::{Result as FmtResult, Formatter, Debug, Display};
 use std::str;
 use std::str::Utf8Error;
+use super::{QueryString};
 
+#[derive(Debug)]
 pub struct Request<'buf> {
     path: &'buf str,
-    query_string: Option<&'buf str>,
+    query_string: Option<QueryString<'buf>>,
     method: Method,
 }
 
@@ -30,7 +32,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         let mut query_string = None;
 
         if let Some(i) = path.find('?') {
-            query_string = Some(&path[i+1..]);
+            query_string = Some(QueryString::from(&path[i+1..]));
             path = &path[..i];
         }
 
@@ -44,7 +46,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 
 fn get_next_word(request: &str) -> Option<(&str, &str)> {
     for (i, c) in request.chars().enumerate() {
-        if c == ' ' {
+        if c == ' ' || c == '\r' {
             return Some((&request[..i], &request[i+1..]));
         }
     }
