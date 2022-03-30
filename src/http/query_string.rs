@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct QueryString<'buf> {
-    data: HashMap<&'buf str, Value<'buf>>
+    data: HashMap<&'buf str, Value<'buf>>,
 }
 
 #[derive(Debug)]
@@ -27,19 +27,19 @@ impl<'buf> From<&'buf str> for QueryString<'buf> {
 
             if let Some(i) = sub_str.find('=') {
                 key = &sub_str[..i];
-                value = &sub_str[i+1..]
+                value = &sub_str[i + 1..]
             }
 
             data.entry(key)
-            .and_modify(|existing: &mut Value| match existing {
-                Value::Single(prev_val) => {
-                    *existing = Value::Multiple(vec![prev_val, value]);
-                },
-                Value::Multiple(vec) => vec.push(value),
-            })
-            .or_insert(Value::Single(value));
+                .and_modify(|existing: &mut Value| match existing {
+                    Value::Single(prev_val) => {
+                        *existing = Value::Multiple(vec![prev_val, value]);
+                    }
+                    Value::Multiple(vec) => vec.push(value),
+                })
+                .or_insert(Value::Single(value));
         }
 
         QueryString { data }
     }
-} 
+}
